@@ -30,10 +30,16 @@ zuul:
       url: http://accommodations:8081/v1/accommodations
     users:
       path: /users/**
-      url: http://rsousers:8082/v1/users/
+      url: http://users:8082/v1/users/
     notifications:
       path: /notifications/**
       url: http://notifications:8083/v1/notifications
+    bookings:
+      path: /bookings/**
+      url: http://bookings:8080/v1/bookings
+    reporting:
+      path: /reporting/**
+      url: http://reporting:8085/v1/reporting
 
 
 

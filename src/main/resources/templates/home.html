@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>FRI riders - Home</title>
+</head>
+<body>
+    <h1>Welcome!</h1>
+    <form th:action="@{/logout}" method="post">
+        <input type="submit" value="Sign Out"/>
+    </form>
+
+    <p>Click <a th:href="@{/api/accommodations}">here</a> to see a accommodations.</p>
+    <p>Click <a th:href="@{/api/users}">here</a> to see a users.</p>
+    <p>Click <a th:href="@{/api/bookings}">here</a> to see a bookings.</p>
+    <p>Click <a th:href="@{/api/notifications/test}">here</a> to see a notifications test page.</p>
+    <p>Click <a th:href="@{/api/reportings/accommodations}">here</a> to see a report of accommodations.</p>
+    <p>Click <a th:href="@{/api/redirect}">here</a> to go to google</p>
+
+    <h3>Useful links:</h3>
+    <h4>Local</h4>
+    <ul>
+        <li><a href="http://localhost:8081/swagger-ui.html">Accommodations swagger</a></li>
+        <li><a href="http://localhost:8081/hystrix/monitor?stream=http%3A%2F%2Flocalhost%3A8081%2Fhystrix.stream">
+            Hystrix
+        </a></li>
+        <li><a href="http://localhost:8082/v1/users">Users</a></li>
+        <li><a href="http://localhost:8083/v1/notifications">Notifications</a></li>
+        <li><a href="http://localhost:8085/v1/reporting">Reporting</a></li>
+    </ul>
+    <h4>Kubernetes:</h4>
+    <ul>
+        <li><a href="http://169.51.16.54:32641/v1/accommodations">Accommodations</a></li>
+        <li><a href="http://169.51.16.54:30735/v1/users">Users</a></li>
+    </ul>
+</body>
+</html>

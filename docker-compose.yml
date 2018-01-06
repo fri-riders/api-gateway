@@ -14,34 +14,23 @@ services:
       - 8400:8400
       - 8500:8500
       - 8600:8600
-  accommodations:
-     image: janerz6/accommodations:0.6.1
-     ports:
-       - 8081:8081
-     environment:
-       - CONFIG_SERVER_URL=consul
-     depends_on:
-       - consul
-  notifications:
-     image: janerz6/notifications:0.4
-     ports:
-       - 8083:8083
-     environment:
-       - CONFIG_SERVER_URL=consul
-     depends_on:
-       - consul
-  rsousers:
-    image: tomisebjanic/rso-users:0.6.4
+  etcd:
+    image: elcolio/etcd:2.0.10
     ports:
-      - 8082:8082
+      - 2379:2379
+      - 2380:2380
+      - 4001:4001
+      - 7001:7001
+  etcd-browser:
+    image: buddho/etcd-browser
+    ports:
+      - 8000:8000
     environment:
-      KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://postgres:5432/rsouser
-      KUMULUZEE_CONFIG_CONSUL_AGENT: http://consul:8500
-      KUMULUZEE_DISCOVERY_CONSUL_AGENT: http://consul:8500
+      ETCD_HOST: http://etcd
+      AUTH_PASS: doe
     depends_on:
-      - postgres
-      - consul
-  postgres:
+      - etcd
+  postgres-users:
     image: postgres:10.0
     ports:
       - 5432:5432
@@ -49,21 +38,70 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: rsouser
-##  reporting:
-##     image: janerz6/reporting:0.1
-##     ports:
-#       - 8085:8085
-#     environment:
-#       - CONFIG_SERVER_URL=consul
-#     depends_on:
-#       - consul
-#  display-bookings:
-#    image: urosbajc/display-bookings:0.2
-#    ports:
-#      - 8080:8080
-#    environment:
-#      KUMULUZEE_CONFIG_CONSUL_AGENT: http://consul:8500
-#      KUMULUZEE_DISCOVERY_CONSUL_AGENT: http://consul:8500
-#      KUMULUZEE_SERVER_BASEURL: http://display-bookings
-#    depends_on:
-#      - consul
+  users:
+    image: tomisebjanic/rso-users:1.0
+    ports:
+      - 8082:8082
+    environment:
+      KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://postgres-users:5432/rsouser
+      KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_SERVER_BASEURL: http://users:8083
+    depends_on:
+      - etcd
+      - postgres-users
+      - auth
+      - bookings
+      - accommodations
+  auth:
+    image: tomisebjanic/rso-auth:1.0
+    ports:
+      - 8083:8083
+    environment:
+      KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_SERVER_BASEURL: http://auth:8083
+    depends_on:
+      - etcd
+  bookings:
+    image: urosbajc/display-bookings:0.3
+    ports:
+      - 8087:8080
+    environment:
+      KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_SERVER_BASEURL: http://bookings:8087
+    depends_on:
+      - etcd
+      - auth
+      - messaging
+  messaging:
+    image: urosbajc/messaging:0.1
+    ports:
+      - 8086:8086
+    depends_on:
+      - etcd
+      - auth
+  accommodations:
+    image: janerz6/accommodations:0.6.1
+    ports:
+      - 8081:8081
+    depends_on:
+      - etcd
+      - auth
+      - notifications
+      - reporting
+  notifications:
+    image: janerz6/notifications:0.4
+    ports:
+      - 8084:8083
+    depends_on:
+      - etcd
+      - auth
+  reporting:
+    image: janerz6/reporting:0.1
+    ports:
+      - 8085:8085
+    depends_on:
+      - etcd
+      - auth
