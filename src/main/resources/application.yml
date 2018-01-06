@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    consul:
+      enabled: true
+      host: ${CONFIG_SERVER_URL:localhost}
+      discovery:
+        hostname: ${DISCOVERY_HOSTNAME:localhost}
+    profiles:
+      active: ${SPR_PROFILE:dev}
+
+zuul:
+  #Service will be mapped under the /api URI
+  prefix: /api
+  routes:
+    test:
+      path: /redirect/**
+      url: http://google.com
+    # exposes notifications with service discovery, but url is ugly /notifications/v1/notifications
+    # i do not know how to map it properly
+    notifications-sd:
+      path: /notifications-sd/**
+      serviceId: notifications
+    accommodations:
+      path: /accommodations/**
+      url: http://accommodations:8081/v1/accommodations
+    users:
+      path: /users/**
+      url: http://rsousers:8082/v1/users/
+    notifications:
+      path: /notifications/**
+      url: http://notifications:8083/v1/notifications
+
+
+
